@@ -1,0 +1,26 @@
+{
+  "year": 2023,
+  "revenue_usd_m": 51000,
+  "ebitda_usd_m": 9600,
+  "ebit_usd_m": 6100,
+  "net_income_usd_m": 3800,
+  "total_assets_usd_m": 65000,
+  "total_debt_usd_m": 14200,
+  "cash_usd_m": 9100,
+  "capex_usd_m": 3500,
+  "fleet_size_vessels": 703,
+  "teu_capacity": 4200000,
+  "volume_teu_m": 12.0,
+  "avg_freight_rate_usd_teu": 1800,
+  "fuel_cost_usd_m": 8695.5,
+  "employees": 100000,
+  "logistics_revenue_usd_m": 15000,
+  "gulf_revenue_share": 0.08,
+  "contract_revenue_share": 0.4,
+  "fx_opex_adjustment_usd_m": 338.3,
+  "live_usd_dkk": 6.49,
+  "active_live_events": [
+    "hormuz_2026"
+  ],
+  "last_updated": "2026-03-28T11:41:36.375330+00:00"
+}

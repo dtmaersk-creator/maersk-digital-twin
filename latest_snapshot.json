@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-03-28T13:56:32.790145+00:00",
+  "quality": 1.0,
+  "tickers": {
+    "maersk_stock": {
+      "current": 16095.0,
+      "pct_change": -1.89,
+      "high": 16465.0,
+      "low": 15975.0,
+      "prev_close": 16405.0
+    },
+    "brent_crude": {
+      "current": 105.32,
+      "pct_change": 3.37,
+      "high": 106.96,
+      "low": 99.3,
+      "prev_close": 101.89
+    },
+    "natural_gas": {
+      "current": 3.025,
+      "pct_change": 3.31,
+      "high": 3.06,
+      "low": 2.913,
+      "prev_close": 2.928
+    },
+    "usd_dkk": {
+      "current": 6.49,
+      "pct_change": 0.21,
+      "high": 6.4963,
+      "low": 6.4699,
+      "prev_close": 6.4763
+    },
+    "usd_eur": {
+      "current": 1.151,
+      "pct_change": -0.25,
+      "high": 1.155,
+      "low": 1.1505,
+      "prev_close": 1.1539
+    },
+    "usd_cny": {
+      "current": 6.9111,
+      "pct_change": 0.01,
+      "high": 6.9151,
+      "low": 6.9072,
+      "prev_close": 6.9102
+    },
+    "sp500": {
+      "current": 6368.85,
+      "pct_change": -1.67,
+      "high": 6453.89,
+      "low": 6356.08,
+      "prev_close": 6477.16
+    }
+  },
+  "fbx": null
+}
