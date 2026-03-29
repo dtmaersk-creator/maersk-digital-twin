@@ -1,14 +1,16 @@
 # =============================================================================
-# dashboard.py v3.0 — Maersk Financial Digital Twin
+# dashboard.py v3.1 — Maersk Financial Digital Twin
 # 5 tabs: Live Twin | Shock Engine | Stock Predictor | Manual Uncertainty | Live Validation
 #
-# CHANGES vs v2.0:
-#   TAB 1 REDESIGNED — Top section now shows:
-#     1. CURRENT SITUATION PANEL — all active global events with live prices
-#     2. BEST STRATEGY RECOMMENDATION — computed from Monte Carlo across active shocks
-#     3. PROJECTED REVENUE — probability-weighted P10/P50/P90 under active scenarios
-#   EXPANDED SIGNALS — VIX, copper, Baltic Dry, KRW, natural gas
-#   BUG FIXES applied (see config.py and auto_updater.py headers)
+# CHANGES vs v3.0:
+#   TAB 1 REDESIGNED (v3.1) — Top section now shows:
+#     1. MAERSK CURRENT REVENUE PANEL — FY2023 baseline revenue, EBITDA, net income, cash
+#     2. CURRENT SCENARIOS PANEL — all active/upcoming events with status
+#     3. OPTIMAL STRATEGIES PER SCENARIO — scenario-specific strategy recommendations
+#     4. OVERALL BEST STRATEGY — probability-weighted recommendation across all scenarios
+#     5. PROJECTED REVENUE — probability-weighted P10/P50/P90 under active scenarios
+#   User now sees: (1) where Maersk is now financially, (2) what scenarios are active,
+#   (3) what strategy is optimal for each, (4) what revenue to expect
 # =============================================================================
 
 import json, os, time
@@ -413,8 +415,8 @@ def compute_projected_revenue(baseline: dict) -> dict:
 
 def render_sidebar():
     with st.sidebar:
-        st.markdown("### 🚢 Maersk Digital Twin v3.0")
-        st.caption("March 2026 — 30 Global Scenarios Edition")
+        st.markdown("### 🚢 Maersk Digital Twin v3.1")
+        st.caption("March 2026 — Enhanced Scenario View")
 
         if os.path.exists(SNAPSHOT_JSON):
             try:
@@ -458,15 +460,17 @@ def render_sidebar():
 
 
 # =============================================================================
-# TAB 1: LIVE TWIN — REDESIGNED
-# Sections (top to bottom):
+# TAB 1: LIVE TWIN — REDESIGNED v3.1
+# New Structure (top to bottom):
 #   A. Header + live badge + data quality
-#   B. ★ CURRENT SITUATION — all active global events
-#   C. ★ BEST STRATEGY RECOMMENDATION
-#   D. ★ PROJECTED REVENUE — P10/P50/P90 under active shocks
-#   E. Ticker strip + sparklines
-#   F. Market intelligence signals
-#   G. Feed health + FSS KPIs
+#   B. ★ MAERSK CURRENT REVENUE & KEY METRICS (FY2023 baseline)
+#   C. ★ CURRENT SCENARIOS — Active and upcoming events
+#   D. ★ OPTIMAL STRATEGIES FOR EACH SCENARIO — scenario-specific recommendations
+#   E. ★ (removed - merged into D)
+#   F. ★ PROJECTED REVENUE — P10/P50/P90 under active shocks
+#   G. Ticker strip + sparklines
+#   H. Market intelligence signals
+#   I. Feed health + FSS KPIs
 # =============================================================================
 
 def render_live_twin(snapshot, history, baseline, intel):
@@ -501,9 +505,51 @@ def render_live_twin(snapshot, history, baseline, intel):
             )
 
     # ══════════════════════════════════════════════════════════════════════════
-    # B. ★ CURRENT SITUATION PANEL
+    # B. ★ MAERSK CURRENT REVENUE & KEY METRICS
     # ══════════════════════════════════════════════════════════════════════════
-    st.markdown('<div class="section-header">🌍 CURRENT GLOBAL SITUATION — ACTIVE EVENTS & RISKS</div>',
+    st.markdown('<div class="section-header">💰 MAERSK CURRENT FINANCIAL POSITION</div>',
+                unsafe_allow_html=True)
+    
+    baseline_rev_annual = baseline.get("revenue_usd_m", BASELINE["revenue_usd_m"])
+    baseline_ebitda = baseline.get("ebitda_usd_m", BASELINE["ebitda_usd_m"])
+    baseline_net_income = baseline.get("net_income_usd_m", BASELINE["net_income_usd_m"])
+    baseline_cash = baseline.get("cash_usd_m", BASELINE["cash_usd_m"])
+    
+    # Maersk Current Revenue Cards
+    mc1, mc2, mc3, mc4 = st.columns(4)
+    
+    mc1.markdown(f"""
+    <div class="rev-card">
+      <div class="rev-label">Annual Revenue (FY2023)</div>
+      <div class="rev-value" style="color:{COLOR_LIVE}">${baseline_rev_annual/1000:.2f}B</div>
+      <div class="rev-delta" style="color:#8B949E">USD</div>
+    </div>""", unsafe_allow_html=True)
+    
+    mc2.markdown(f"""
+    <div class="rev-card">
+      <div class="rev-label">EBITDA</div>
+      <div class="rev-value" style="color:{COLOR_POSITIVE}">${baseline_ebitda/1000:.2f}B</div>
+      <div class="rev-delta" style="color:#8B949E">Operating Profit</div>
+    </div>""", unsafe_allow_html=True)
+    
+    mc3.markdown(f"""
+    <div class="rev-card">
+      <div class="rev-label">Net Income</div>
+      <div class="rev-value" style="color:{COLOR_POSITIVE}">${baseline_net_income/1000:.2f}B</div>
+      <div class="rev-delta" style="color:#8B949E">After-tax Profit</div>
+    </div>""", unsafe_allow_html=True)
+    
+    mc4.markdown(f"""
+    <div class="rev-card">
+      <div class="rev-label">Cash Position</div>
+      <div class="rev-value" style="color:{COLOR_NEUTRAL}">${baseline_cash/1000:.2f}B</div>
+      <div class="rev-delta" style="color:#8B949E">Liquidity Available</div>
+    </div>""", unsafe_allow_html=True)
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # C. ★ CURRENT SCENARIOS — ACTIVE & UPCOMING EVENTS
+    # ══════════════════════════════════════════════════════════════════════════
+    st.markdown('<div class="section-header">🌍 CURRENT & UPCOMING SCENARIOS</div>',
                 unsafe_allow_html=True)
 
     # Pull live prices for display
@@ -659,62 +705,148 @@ def render_live_twin(snapshot, history, baseline, intel):
             </div>""", unsafe_allow_html=True)
 
     # ══════════════════════════════════════════════════════════════════════════
-    # C. ★ BEST STRATEGY RECOMMENDATION
+    # D. ★ OPTIMAL STRATEGIES FOR CURRENT SCENARIOS
     # ══════════════════════════════════════════════════════════════════════════
-    st.markdown('<div class="section-header">🏆 OPTIMAL STRATEGY RECOMMENDATION — Live Shock Analysis</div>',
+    st.markdown('<div class="section-header">🏆 OPTIMAL STRATEGIES FOR EACH SCENARIO</div>',
                 unsafe_allow_html=True)
 
-    if intel and intel.get("recommended_strategy"):
-        most_likely   = intel["most_likely_shock"]
-        best_strat    = intel["recommended_strategy"]
-        confidence    = intel["shock_confidence"]
-        shock_label   = SHOCK_SCENARIOS[most_likely]["label"]
-        strat_label   = STRATEGIES[best_strat]["label"]
-        strat_cadence = STRATEGIES[best_strat].get("real_world_cadence","")
-
-        sc1, sc2 = st.columns([2, 1])
-        with sc1:
-            st.markdown(f"""
-            <div class="strategy-card">
-              <div style="font-size:11px;color:#8B949E;text-transform:uppercase;
-                          letter-spacing:1px;margin-bottom:4px">
-                #1 RECOMMENDED STRATEGY — based on live Monte Carlo across {len(get_active_live_scenarios())} active shocks
-              </div>
-              <div class="strategy-title">✅ {strat_label}</div>
-              <div class="strategy-body">
-                <b>Primary shock driving recommendation:</b> {shock_label}
-                ({confidence}% confidence from live market signals)<br>
-                <b>Real-world cadence:</b> {strat_cadence}<br>
-                <b>Why this now:</b> {STRATEGIES[best_strat].get('label','')} delivers the highest
-                probability-weighted NPV advantage versus do-nothing under current market conditions.
-                Monte Carlo run across {MONTE_CARLO_RUNS:,} simulations per scenario.
-              </div>
-            </div>""", unsafe_allow_html=True)
-
-        with sc2:
-            # Top 3 strategies ranked
-            st.markdown("**🥇 Full Strategy Ranking** (current conditions)")
-            try:
-                engine = MonteCarloEngine(baseline)
-                strat_r = {k: engine.run_single(most_likely, k) for k in STRATEGIES}
-                ranked = sorted(
-                    [(k, v.strategy_npv_advantage_usd_m) for k, v in strat_r.items() if k != "do_nothing"],
-                    key=lambda x: x[1], reverse=True
-                )
-                rank_df = pd.DataFrame([{
-                    "Rank": f"#{i+1}",
-                    "Strategy": STRATEGIES[k]["label"][:35],
-                    "NPV Advantage": f"${npv:+,.0f}M",
-                } for i, (k, npv) in enumerate(ranked[:6])])
-                st.dataframe(rank_df, use_container_width=True, hide_index=True,
-                             height=220)
-            except Exception as exc:
-                st.warning(f"Strategy ranking unavailable: {exc}")
-    else:
-        st.info("⏳ Computing strategy recommendation — waiting for first data fetch...")
+    # Get active scenarios
+    active_scenarios = get_active_live_scenarios()
+    if not active_scenarios:
+        # If no live events, use the most likely scenario from intelligence
+        if intel and intel.get("most_likely_shock"):
+            active_scenarios = [intel["most_likely_shock"]]
+        else:
+            active_scenarios = ["demand_collapse", "fuel_price_spike"]
+    
+    # Compute best strategy for each active scenario
+    st.markdown(f"""
+    <div class="alert-blue">
+        Analyzing <b>{len(active_scenarios)} active scenario(s)</b> with <b>{MONTE_CARLO_RUNS:,} Monte Carlo simulations</b> per scenario 
+        to determine optimal strategic response.
+    </div>
+    """, unsafe_allow_html=True)
+    
+    try:
+        engine = MonteCarloEngine(baseline)
+        scenario_strategies = {}
+        
+        for sc_key in active_scenarios:
+            # Run all strategies for this scenario
+            strat_results = {k: engine.run_single(sc_key, k) for k in STRATEGIES}
+            # Find best strategy (excluding do_nothing)
+            best_strat = max(
+                [k for k in strat_results if k != "do_nothing"],
+                key=lambda k: strat_results[k].strategy_npv_advantage_usd_m
+            )
+            scenario_strategies[sc_key] = {
+                "best_strategy": best_strat,
+                "best_result": strat_results[best_strat],
+                "do_nothing": strat_results["do_nothing"],
+                "all_results": strat_results,
+            }
+        
+        # Display strategy recommendations in cards
+        num_scenarios = len(scenario_strategies)
+        cols_per_row = min(num_scenarios, 2)
+        
+        for idx, (sc_key, sc_data) in enumerate(scenario_strategies.items()):
+            if idx % cols_per_row == 0:
+                cols = st.columns(cols_per_row)
+            
+            col_idx = idx % cols_per_row
+            with cols[col_idx]:
+                sc_info = SHOCK_SCENARIOS[sc_key]
+                best_strat = sc_data["best_strategy"]
+                strat_info = STRATEGIES[best_strat]
+                result = sc_data["best_result"]
+                do_nothing = sc_data["do_nothing"]
+                
+                npv_advantage = result.strategy_npv_advantage_usd_m
+                prob_loss = result.prob_net_loss * 100
+                
+                # Color based on severity
+                if sc_info.get("live_event", False):
+                    card_style = "border-color:#FF6B35"  # Critical - live event
+                elif npv_advantage > 1000:
+                    card_style = f"border-color:{COLOR_LIVE}"  # High value opportunity
+                else:
+                    card_style = f"border-color:{COLOR_NEUTRAL}"  # Standard
+                
+                st.markdown(f"""
+                <div class="strategy-card" style="{card_style}">
+                  <div style="font-size:12px;color:#8B949E;text-transform:uppercase;
+                              letter-spacing:1px;margin-bottom:6px">
+                    {'🔴 ACTIVE EVENT' if sc_info.get('live_event') else '⚠️ SCENARIO'}
+                  </div>
+                  <div class="situation-title">{sc_info['label']}</div>
+                  <div class="situation-meta" style="margin-top:4px;margin-bottom:10px">
+                    {sc_info.get('description', '')[:120]}...
+                  </div>
+                  
+                  <div style="background:rgba(0,229,255,0.05);padding:10px;border-radius:6px;margin-top:8px">
+                    <div style="font-size:13px;font-weight:700;color:{COLOR_LIVE};margin-bottom:6px">
+                      ✅ Recommended: {strat_info['label']}
+                    </div>
+                    <div style="font-size:11px;color:#C9D1D9;line-height:1.5">
+                      <b>NPV Advantage:</b> <span style="color:{COLOR_LIVE}">${npv_advantage:+,.0f}M</span> vs do-nothing<br>
+                      <b>Probability of Loss:</b> {prob_loss:.1f}%<br>
+                      <b>Cadence:</b> {strat_info.get('real_world_cadence', 'As needed')}
+                    </div>
+                  </div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        # Overall best strategy across all scenarios
+        st.markdown("---")
+        st.markdown("### 🥇 Overall Best Strategy (All Scenarios Combined)")
+        
+        # Weight by probability if available
+        weighted_strategies = {}
+        for strat_key in STRATEGIES:
+            if strat_key == "do_nothing":
+                continue
+            total_weighted_npv = 0
+            total_weight = 0
+            for sc_key, sc_data in scenario_strategies.items():
+                prob = SHOCK_SCENARIOS[sc_key].get("live_event_probability", 0.5)
+                npv = sc_data["all_results"][strat_key].strategy_npv_advantage_usd_m
+                total_weighted_npv += npv * prob
+                total_weight += prob
+            weighted_strategies[strat_key] = total_weighted_npv / total_weight if total_weight > 0 else total_weighted_npv
+        
+        overall_best = max(weighted_strategies, key=weighted_strategies.get)
+        overall_best_info = STRATEGIES[overall_best]
+        overall_npv = weighted_strategies[overall_best]
+        
+        st.markdown(f"""
+        <div class="strategy-card">
+          <div class="strategy-title">✅ {overall_best_info['label']}</div>
+          <div class="strategy-body">
+            <b>Probability-Weighted NPV Advantage:</b> ${overall_npv:+,.0f}M<br>
+            <b>Why this strategy:</b> {overall_best_info['label']} delivers the highest expected value 
+            across all active scenarios, weighted by their probability of occurrence.<br>
+            <b>Implementation:</b> {overall_best_info.get('real_world_cadence', 'Immediate')}
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    except Exception as exc:
+        st.error(f"Error computing scenario strategies: {exc}")
+        st.markdown(f"""
+        <div class="alert-warning">
+            ⚠️ Strategy analysis temporarily unavailable. Using fallback recommendation.
+        </div>
+        """, unsafe_allow_html=True)
 
     # ══════════════════════════════════════════════════════════════════════════
-    # D. ★ PROJECTED REVENUE — P10/P50/P90 under active shocks
+    # E. ★ BACKUP: ORIGINAL BEST STRATEGY RECOMMENDATION (if intel available)
+    # ══════════════════════════════════════════════════════════════════════════
+
+    # Strategy section has been moved above - this section removed
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # F. ★ PROJECTED REVENUE — P10/P50/P90 under active shocks
     # ══════════════════════════════════════════════════════════════════════════
     st.markdown('<div class="section-header">📊 PROJECTED REVENUE — Under Active Shock Scenarios</div>',
                 unsafe_allow_html=True)
@@ -804,7 +936,7 @@ def render_live_twin(snapshot, history, baseline, intel):
             st.plotly_chart(fig, use_container_width=True, key="rev_fan_chart")
 
     # ══════════════════════════════════════════════════════════════════════════
-    # E. TICKER STRIP + SPARKLINES
+    # G. TICKER STRIP + SPARKLINES
     # ══════════════════════════════════════════════════════════════════════════
     if snapshot:
         st.markdown('<div class="section-header">📈 LIVE MARKET DATA</div>', unsafe_allow_html=True)
@@ -836,7 +968,7 @@ def render_live_twin(snapshot, history, baseline, intel):
         st.warning("⏳ Waiting for first data fetch (takes ~30 seconds)...")
 
     # ══════════════════════════════════════════════════════════════════════════
-    # F. MARKET INTELLIGENCE SIGNALS
+    # H. MARKET INTELLIGENCE SIGNALS
     # ══════════════════════════════════════════════════════════════════════════
     if intel and intel.get("signals"):
         st.markdown('<div class="section-header">🤖 LIVE MARKET INTELLIGENCE</div>', unsafe_allow_html=True)
@@ -850,7 +982,7 @@ def render_live_twin(snapshot, history, baseline, intel):
                         unsafe_allow_html=True)
 
     # ══════════════════════════════════════════════════════════════════════════
-    # G. FEED HEALTH + FSS KPIs
+    # I. FEED HEALTH + FSS KPIs
     # ══════════════════════════════════════════════════════════════════════════
     st.markdown('<div class="section-header">DATA FEED HEALTH</div>', unsafe_allow_html=True)
     health = get_feed_health()
