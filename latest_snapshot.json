@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-04-01T09:49:51.025814+00:00",
+  "quality": 0.97,
+  "tickers": {
+    "maersk_stock": {
+      "current": 15955.0,
+      "pct_change": -0.62,
+      "high": 16000.0,
+      "low": 15515.0,
+      "prev_close": 16055.0
+    },
+    "brent_crude": {
+      "current": 103.14,
+      "pct_change": -0.8,
+      "high": 105.9,
+      "low": 98.46,
+      "prev_close": 103.97
+    },
+    "natural_gas": {
+      "current": 2.879,
+      "pct_change": -0.17,
+      "high": 2.899,
+      "low": 2.848,
+      "prev_close": 2.884
+    },
+    "coal": {
+      "current": 104.75,
+      "pct_change": 8.32,
+      "high": 104.75,
+      "low": 104.75,
+      "prev_close": 96.7
+    },
+    "sp500": {
+      "current": 6528.52,
+      "pct_change": 2.91,
+      "high": 6539.05,
+      "low": 6395.88,
+      "prev_close": 6343.72
+    },
+    "copper": {
+      "current": 5.621,
+      "pct_change": 0.12,
+      "high": 5.663,
+      "low": 5.617,
+      "prev_close": 5.614
+    },
+    "vix": {
+      "current": 24.95,
+      "pct_change": -1.19,
+      "high": 25.13,
+      "low": 24.21,
+      "prev_close": 25.25
+    },
+    "usd_dkk": {
+      "current": 6.4462,
+      "pct_change": -0.3,
+      "high": 6.4675,
+      "low": 6.4349,
+      "prev_close": 6.4659
+    },
+    "usd_eur": {
+      "current": 1.1593,
+      "pct_change": 0.31,
+      "high": 1.1614,
+      "low": 1.1557,
+      "prev_close": 1.1557
+    },
+    "usd_cny": {
+      "current": 6.8735,
+      "pct_change": -0.35,
+      "high": 6.8975,
+      "low": 6.8707,
+      "prev_close": 6.8975
+    },
+    "usd_krw": {
+      "current": 1507.29,
+      "pct_change": 0.2,
+      "high": 1513.28,
+      "low": 1495.98,
+      "prev_close": 1504.35
+    },
+    "usd_inr": {
+      "current": 93.31,
+      "pct_change": -0.14,
+      "high": 93.863,
+      "low": 92.988,
+      "prev_close": 93.437
+    }
+  },
+  "fbx": null
+}
